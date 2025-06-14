@@ -9,7 +9,7 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/gliderlabs/ssh"
-	"github.com/jackc/pgx/v5"
+	"github.com/phthallo/guestbook/internal"
 )
 
 var (
@@ -19,21 +19,18 @@ var (
 )
 
 func main(){
-	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+	conn, ctx := internal.CreateDBConnection()
+	if _, err := internal.CreateEntriesIfNotExists(conn, ctx); err != nil {
+		fmt.Printf("Entries table creation failed. %v", err)
+		return
 	}
-	defer conn.Close(context.Background())
-
-	tableExists, err := createEntriesIfNotExists(context.Background(), conn);
-	fmt.Printf("Entries table exists: %t, %v", tableExists, err)
 
 	ssh.Handle(func(sess ssh.Session) {
 		io.WriteString(sess, "dfsdfsd")
 		form := huh.NewForm(
 			huh.NewGroup(
 				huh.NewInput().
-					Title("leave a message?").
+					Title("you've reached phthallo. leave a message?").
 					Value(&message),
 				huh.NewInput().
 					Title("who are you?").
@@ -49,15 +46,17 @@ func main(){
 			fmt.Println(err)
 			os.Exit(1)
 		} else if (submitted) {
+			io.WriteString(sess, fmt.Sprintf("Submmited name was %f, submitted messagw asa %f", name, message))
 			tx, transaction_err := conn.Begin(context.Background())
 			if (transaction_err != nil){
 				io.WriteString(sess, fmt.Sprintf("an error occurred starting the transaction:, %s\n", transaction_err))
+				return
 			}
 			if _, exec_err := tx.Exec(context.Background(), "INSERT into entries (name, message) VALUES ($1, $2)", name, message); exec_err != nil {
-				fmt.Printf("%v", exec_err)
+				io.WriteString(sess, fmt.Sprintf("%v", exec_err))
+				return
 			}
-			commit_err := tx.Commit(context.Background())
-			if (commit_err != nil){
+			if commit_err := tx.Commit(context.Background()); commit_err != nil {
 				io.WriteString(sess, fmt.Sprintf("an error occurred saving your message: %s\n", commit_err))
 				return
 			}
@@ -66,28 +65,6 @@ func main(){
 			io.WriteString(sess, fmt.Sprintf("see ya, %s\n", name))
 		}
 	})
+	defer conn.Close(context.Background())
 	log.Fatal(ssh.ListenAndServe(":2222", nil))
-}
-
-func createEntriesIfNotExists(ctx context.Context, conn *pgx.Conn) (bool, error) {
-	// the boolean that this function returns refers to whether the table exists 
-	var n int64
-	err := conn.QueryRow(ctx, "select 1 from information_schema.tables where table_name = $1", "entries").Scan(&n)
-	if (err != nil){
-		// attempt to create the database
-		tx, err := conn.Begin(ctx); 
-		if err != nil {
-			return false, fmt.Errorf("unable to begin transaction: %v", err)
-		}
-
-		if _, err := tx.Exec(ctx, "CREATE TABLE entries (name text, message text)"); err != nil {
-			return false, fmt.Errorf("unable to execute table creation: %v", err)
-		}
-
-		if err = tx.Commit(ctx); err != nil {
-			return false, fmt.Errorf("unable to commit table creation: %v", err) 
-		}
-		return true, nil
-	}
-	return true, nil
 }
