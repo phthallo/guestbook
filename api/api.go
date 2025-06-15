@@ -19,6 +19,8 @@ type Entry struct {
 }
 
 func GetEntries(ctx *gin.Context, conn *pgx.Conn, limit string){
+	// Returns entries in the guestbook
+	// Limit, as the name suggests, limits the number of entries returned.
 	var jsonBytes []byte
 	if err := conn.QueryRow(context.Background(), "SELECT json_agg(json_build_object('name', limited_entries.name, 'message', limited_entries.message, 'timestamp', limited_entries.timestamp)) from (SELECT id, name, message, timestamp FROM entries ORDER BY id DESC LIMIT $1) AS limited_entries", limit).Scan(&jsonBytes); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf(`Failed to select entries %f`, err)})

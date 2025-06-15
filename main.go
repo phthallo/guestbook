@@ -28,7 +28,7 @@ func StartSSHService() {
 	}
 
 	fmt.Println("\x1B[32m✔\tguestbook is up and running!\033[0m\t\t")
-	theme := internal.ThemeGruvbox()
+	theme := huh.ThemeDracula()
 	ssh.Handle(func(sess ssh.Session) {
 		form := huh.NewForm(
 			huh.NewGroup(
@@ -36,7 +36,6 @@ func StartSSHService() {
 					Title("you've reached phthallo. leave a message?").
 					Value(&message).
 					Validate( func(str string) error {
-						fmt.Println(str)
 						if len(str) == 0 {
 							return errors.New("speak now or forever hold your peace")
 						}
@@ -46,7 +45,6 @@ func StartSSHService() {
 					Title("who are you?").
 					Value(&name).
 					Validate( func(str string) error {
-						fmt.Println(str)
 						if len(str) == 0 {
 							return errors.New("you're not arya stark!")
 						}
@@ -65,7 +63,7 @@ func StartSSHService() {
 			return
 		} else if (submitted) {
 			name, message = internal.Filter(name, message)
-			fmt.Println("Name:%s\nMessage:%s\n", name, message)
+			fmt.Printf("A new message was submitted by '%s'. They said '%s'\n", name, message)
 			tx, transaction_err := conn.Begin(context.Background())
 			if (transaction_err != nil){
 				io.WriteString(sess, fmt.Sprintf("an error occurred starting the transaction:, %s\n", transaction_err))
@@ -79,13 +77,13 @@ func StartSSHService() {
 				io.WriteString(sess, fmt.Sprintf("an error occurred saving your message: %s\n", commit_err))
 				return
 			}
-			io.WriteString(sess, fmt.Sprintf("\x1B[34mthanks for the message, %s!\nsee it on phthallo.com/guestbook :)\033[0m", name))
+			io.WriteString(sess, fmt.Sprintf("\x1B[34mthanks for the message, %s!\nsee it on phthallo.com/guestbook :)\n\033[0m", name))
 		} else {
 			io.WriteString(sess, fmt.Sprintf("\x1B[34mcome back when you've got something to say, %s\n\033[0m", name))
 		}
 	})
 	defer conn.Close(context.Background())
-	ssh.ListenAndServe(":2222", nil)
+	ssh.ListenAndServe(":2222", nil, ssh.HostKeyFile("ed25519"))
 }
 
 func main(){
