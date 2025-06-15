@@ -4,10 +4,10 @@
 ssh guestbook@phthallo.com
 ```
 
-<p style = "text-align: center; font-style: italic">leave me a message! [^1]</p>
+<p align = "center"><i>leave me a message!</i></p>
 
 
-Guestbook is exactly what the name suggests - a guestbook for anyone who happens to stumble upon it. There are two parts to this: the SSH app where you can write a small message for me, and an API with a GET endpoint that returns the messages sent.
+Guestbook[^1] is exactly what the name suggests - a guestbook for anyone who happens to stumble upon it. There are two parts to this: the SSH app where you can write a small message for me, and an API with a GET endpoint that returns the messages sent.
 
 ## Development
 
