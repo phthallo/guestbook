@@ -26,18 +26,18 @@ func CreateEntriesIfNotExists(conn *pgx.Conn, ctx context.Context) (bool, error)
 		tx, err := conn.Begin(ctx); 
 
 		if err != nil {
-			return false, fmt.Errorf("✕ unable to begin transaction: %v", err)
+			return false, fmt.Errorf("\x1B[31m✕\033[0m\tunable to begin transaction: %v", err)
 		}
 
-		if _, err := tx.Exec(ctx, "CREATE TABLE entries (id INTEGER primary key GENERATED ALWAYS AS IDENTITY, name TEXT, message TEXT, timestamp TIMESTAMP default current_timestamp)"); err != nil {
-			return false, fmt.Errorf("✕ unable to execute table creation: %v", err)
+		if _, err := tx.Exec(ctx, "CREATE TABLE entries (id INTEGER primary key GENERATED ALWAYS AS IDENTITY, name TEXT, message TEXT, approved BOOLEAN default null timestamp TIMESTAMP default current_timestamp)"); err != nil {
+			return false, fmt.Errorf("\x1B[31m✕\033[0m\tunable to execute table creation: %v", err)
 		}
 
 		if err = tx.Commit(ctx); err != nil {
 			return false, fmt.Errorf("✕ unable to commit table creation: %v", err) 
 		}
 
-		fmt.Println("\x1B[32m✔ created entries table for storing guestbook entries!\033[0m\t\t")
+		fmt.Println("\x1B[32m✔\033[0m\tcreated entries table for storing guestbook entries!")
 
 		return true, nil
 	}
