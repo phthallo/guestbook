@@ -34,20 +34,11 @@ func StartSSHService(dbpool *pgxpool.Pool, ctx context.Context) {
 		form := huh.NewForm(
 			huh.NewGroup(
 				huh.NewInput().
-					Title("you've reached phthallo. leave a message?").
+					Title(fmt.Sprintf("thanks for calling, %s.\nyou've reached phthallo. leave a message?", sess.User())).
 					Value(&message).
 					Validate( func(str string) error {
 						if len(str) == 0 {
 							return errors.New("speak now or forever hold your peace")
-						}
-						return nil
-					}),
-				huh.NewInput().
-					Title("who are you?").
-					Value(&name).
-					Validate( func(str string) error {
-						if len(str) == 0 {
-							return errors.New("you're not arya stark!")
 						}
 						return nil
 					}),
@@ -63,6 +54,7 @@ func StartSSHService(dbpool *pgxpool.Pool, ctx context.Context) {
 			fmt.Println(err)
 			return
 		} else if (submitted) {
+			name = sess.User()
 			name, message = internal.Filter(name, message)
 			fmt.Printf("A new message was submitted by '%s'. They said '%s'\n", name, message)
 			tx, transaction_err := dbpool.Begin(context.Background())
@@ -78,7 +70,7 @@ func StartSSHService(dbpool *pgxpool.Pool, ctx context.Context) {
 				io.WriteString(sess, fmt.Sprintf("an error occurred saving your message: %s\n", commit_err))
 				return
 			}
-			io.WriteString(sess, fmt.Sprintf("\x1B[34mthanks for the message, %s!\nsee it on phthallo.com/guestbook :)\n\033[0m", name))
+			io.WriteString(sess, fmt.Sprintf("\x1B[34mty for the message, %s!\nsee it on phthallo.com/guestbook :)\n\033[0m", name))
 		} else {
 			io.WriteString(sess, fmt.Sprintf("\x1B[34mcome back when you've got something to say, %s\n\033[0m", name))
 		}

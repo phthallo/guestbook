@@ -1,7 +1,7 @@
 # guestbook
 
 ```
-ssh guestbook.phthallo.com
+ssh guestbook.phthallo.com -p 2222
 ```
 
 <p align = "center"><i>leave me a message!</i></p>
