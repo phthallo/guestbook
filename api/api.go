@@ -1,9 +1,10 @@
-package main
+package api
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -14,32 +15,42 @@ import (
 type Entry struct {
 	Name       string	 `json:"name"`
 	Message    string    `json:"message"`
+    Timestamp  string    `json:"timestamp"`
 }
 
-func GetEntries(ctx *gin.Context, conn *pgx.Conn){
+func GetEntries(ctx *gin.Context, conn *pgx.Conn, limit string){
 	var jsonBytes []byte
-	err := conn.QueryRow(context.Background(), "SELECT json_agg(json_build_object('name', entries.name, 'message', entries.message)) from entries").Scan(&jsonBytes)
+	if err := conn.QueryRow(context.Background(), "SELECT json_agg(json_build_object('name', limited_entries.name, 'message', limited_entries.message, 'timestamp', limited_entries.timestamp)) from (SELECT id, name, message, timestamp FROM entries ORDER BY id DESC LIMIT $1) AS limited_entries", limit).Scan(&jsonBytes); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf(`Failed to select entries %f`, err)})
+		return
+	}
+	
+	if len(jsonBytes) == 0 {
+		ctx.IndentedJSON(http.StatusOK, make([]string, 0))
+		return
+	}
+
 	var entries []Entry
 	if err := json.Unmarshal(jsonBytes, &entries); err != nil {
 		fmt.Printf("%v", err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch entries"})
-	}
-	if (err != nil){
-		fmt.Printf("%v", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to jsonify entries"})
+		return
 	}
 	ctx.IndentedJSON(http.StatusOK, entries)
 }
 
 
-func main(){
+func StartAPIService(){
 	conn, _ := internal.CreateDBConnection()
-
+	if os.Getenv("GIN_MODE") == "release" {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	router := gin.Default()
 	router.GET("/entries", func (context *gin.Context){
-		GetEntries(context, conn)
+		limit := context.DefaultQuery("limit", "10")
+		GetEntries(context, conn, limit)
 	})
 	defer conn.Close(context.Background())
-
-	router.Run("localhost:4142")
+	router.Run(os.Getenv("API_PORT"))
 
 }
