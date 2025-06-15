@@ -1,7 +1,7 @@
 # guestbook
 
 ```
-ssh guestbook@phthallo.com
+ssh guestbook.phthallo.com
 ```
 
 <p align = "center"><i>leave me a message!</i></p>
@@ -20,7 +20,7 @@ Guestbook[^1] is exactly what the name suggests - a guestbook for anyone who hap
 
 3. Generate a SSH key in the `guestbook` directory. Skip the passphrase.
     ```
-    ssh-keygen -t ed25519 -f ed25519
+    ssh-keygen -t ed25519 -f id_ed25519
     ```
 
 3. Install dependencies
@@ -42,6 +42,7 @@ Guestbook[^1] is exactly what the name suggests - a guestbook for anyone who hap
 | Variable | Explanation |
 | -------- | ----------- |
 | `API_PORT` | Port to run the API on. |
+| `SSH_PORT` | Port to listen on for SSH. |
 | `GIN_MODE` | Set it to `release` in production. Set it to anything else for `debug` mode in development.
 | `DATABASE_URL` | URL of a Postgres database used for storing messages. |
 

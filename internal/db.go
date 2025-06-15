@@ -4,26 +4,26 @@ import (
 	"context"
 	"fmt"
 	"os"
-
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func CreateDBConnection() (conn *pgx.Conn, ctx context.Context){
-	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+func CreateDBConnection() (pool *pgxpool.Pool, ctx context.Context){
+	pool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		os.Exit(1)
 	}
-	return conn, context.Background()
+	return pool, context.Background()
 }
 
-func CreateEntriesIfNotExists(conn *pgx.Conn, ctx context.Context) (bool, error) {
+func CreateEntriesIfNotExists(dbpool *pgxpool.Pool, ctx context.Context) (bool, error) {
 	// the boolean that this function returns refers to whether the table exists 
 	var n int64
-	err := conn.QueryRow(ctx, "select 1 from information_schema.tables where table_name = $1 AND table_schema = 'public'", "entries").Scan(&n)
+	err := dbpool.QueryRow(ctx, "select 1 from information_schema.tables where table_name = $1 AND table_schema = 'public'", "entries").Scan(&n)
 
 	if (err != nil){
 		// attempt to create the database
-		tx, err := conn.Begin(ctx); 
+		tx, err := dbpool.Begin(ctx); 
 
 		if err != nil {
 			return false, fmt.Errorf("\x1B[31m✕\033[0m\tunable to begin transaction: %v", err)

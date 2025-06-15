@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"io"
 	"errors"
+	"os"
 
 	"github.com/charmbracelet/huh"
 	"github.com/gliderlabs/ssh"
 	"github.com/joho/godotenv"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/phthallo/guestbook/internal"
 	"github.com/phthallo/guestbook/api"
 )
@@ -20,9 +22,8 @@ var (
 )
 
 
-func StartSSHService() {
-	conn, ctx := internal.CreateDBConnection()
-	if _, err := internal.CreateEntriesIfNotExists(conn, ctx); err != nil {
+func StartSSHService(dbpool *pgxpool.Pool, ctx context.Context) {
+	if _, err := internal.CreateEntriesIfNotExists(dbpool, ctx); err != nil {
 		fmt.Printf("Entries table creation failed. %v", err)
 		return
 	}
@@ -64,7 +65,7 @@ func StartSSHService() {
 		} else if (submitted) {
 			name, message = internal.Filter(name, message)
 			fmt.Printf("A new message was submitted by '%s'. They said '%s'\n", name, message)
-			tx, transaction_err := conn.Begin(context.Background())
+			tx, transaction_err := dbpool.Begin(context.Background())
 			if (transaction_err != nil){
 				io.WriteString(sess, fmt.Sprintf("an error occurred starting the transaction:, %s\n", transaction_err))
 				return
@@ -82,8 +83,7 @@ func StartSSHService() {
 			io.WriteString(sess, fmt.Sprintf("\x1B[34mcome back when you've got something to say, %s\n\033[0m", name))
 		}
 	})
-	defer conn.Close(context.Background())
-	ssh.ListenAndServe(":2222", nil, ssh.HostKeyFile("ed25519"))
+	ssh.ListenAndServe(fmt.Sprintf(":%s",os.Getenv("SSH_PORT")), nil, ssh.HostKeyFile("id_ed25519"))
 }
 
 func main(){
@@ -96,7 +96,10 @@ func main(){
  | |  _| | | |  _| \___ \ | | |  _ \| | | | | | | ' / 
  | |_| | |_| | |___ ___) || | | |_) | |_| | |_| | . \ 
   \____|\___/|_____|____/ |_| |____/ \___/ \___/|_|\_\`)
-	go api.StartAPIService()
-	go StartSSHService()
+  	dbpool, ctx := internal.CreateDBConnection()
+
+	go api.StartAPIService(dbpool)
+	go StartSSHService(dbpool, ctx)
+	defer dbpool.Close()
 	select {}
 }
