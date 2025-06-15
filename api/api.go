@@ -50,6 +50,9 @@ func StartAPIService(dbpool *pgxpool.Pool){
 		limit := context.DefaultQuery("limit", "10")
 		GetEntries(context, dbpool, limit)
 	})
+	router.GET("/", func (context *gin.Context){
+		context.Redirect(http.StatusFound, "https://phthallo.com/guestbook")
+	})
 	router.Run(fmt.Sprintf(":%s",os.Getenv("API_PORT")))
 
 }

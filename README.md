@@ -7,7 +7,7 @@ ssh guestbook.phthallo.com -p 2222
 <p align = "center"><i>leave me a message!</i></p>
 
 
-Guestbook[^1] is exactly what the name suggests - a guestbook for anyone who happens to stumble upon it. There are two parts to this: the SSH app where you can write a small message for me, and an API with a GET endpoint that returns the messages sent.
+Guestbook[^1] is exactly what the name suggests - a guestbook for anyone who happens to stumble upon it. There are two parts to this: the SSH app where you can write a small message for me, and an API (`/entries`) with a GET endpoint that returns the messages sent.
 
 ## Development
 
@@ -37,6 +37,16 @@ Guestbook[^1] is exactly what the name suggests - a guestbook for anyone who hap
     ```
     go build 
     ```
+
+## Docker
+
+Use the provided `docker-compose.yml` if you'd like. 
+
+```
+docker compose up -d
+```
+
+Generate the `ed25519` key outside of the container to avoid it being recreated every time you rebuild, which will cause scary looking `REMOTE HOST IDENTIFICATION CHANGED` errors.
 
 ## Environment Variables
 | Variable | Explanation |
