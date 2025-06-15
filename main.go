@@ -31,6 +31,8 @@ func StartSSHService(dbpool *pgxpool.Pool, ctx context.Context) {
 	fmt.Println("\x1B[32m✔\tguestbook is up and running!\033[0m\t\t")
 	theme := huh.ThemeDracula()
 	ssh.Handle(func(sess ssh.Session) {
+		name = sess.User()
+
 		form := huh.NewForm(
 			huh.NewGroup(
 				huh.NewInput().
@@ -50,11 +52,11 @@ func StartSSHService(dbpool *pgxpool.Pool, ctx context.Context) {
 		).WithOutput(sess).WithInput(sess).WithTheme(theme)
 
 		err := form.Run()
+
 		if (err != nil) {
 			fmt.Println(err)
 			return
 		} else if (submitted) {
-			name = sess.User()
 			name, message = internal.Filter(name, message)
 			fmt.Printf("A new message was submitted by '%s'. They said '%s'\n", name, message)
 			tx, transaction_err := dbpool.Begin(context.Background())
