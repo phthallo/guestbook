@@ -1,0 +1,8 @@
+services:
+  guestbook:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports: 
+      - "${API_PORT}:${API_PORT}"
+      - "${SSH_PORT}:${SSH_PORT}"
