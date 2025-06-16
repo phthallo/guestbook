@@ -6,6 +6,7 @@ import (
 	"io"
 	"errors"
 	"os"
+	"regexp"
 
 	"github.com/charmbracelet/huh"
 	"github.com/gliderlabs/ssh"
@@ -32,6 +33,12 @@ func StartSSHService(dbpool *pgxpool.Pool, ctx context.Context) {
 	theme := huh.ThemeDracula()
 	ssh.Handle(func(sess ssh.Session) {
 		name = sess.User()
+		hostNameRegex, _ := regexp.Compile("(?:.*@)?([^@:]+)")
+
+		matchDomain := hostNameRegex.FindString(fmt.Sprintf("%s", sess.LocalAddr()))
+		if matchDomain != os.Getenv("HOSTNAME") {
+			sess.Exit(1)
+		}
 
 		form := huh.NewForm(
 			huh.NewGroup(
@@ -58,7 +65,7 @@ func StartSSHService(dbpool *pgxpool.Pool, ctx context.Context) {
 			return
 		} else if (submitted && message != "") {
 			name, message = internal.Filter(name, message)
-			fmt.Printf("A new message was submitted by '%s'. They said '%s'\n", name, message)
+			fmt.Printf("A new message was submitted by '%s' from IP address %s. They said '%s'\n", name, sess.RemoteAddr(), message)
 			tx, transaction_err := dbpool.Begin(context.Background())
 			if (transaction_err != nil){
 				io.WriteString(sess, fmt.Sprintf("an error occurred starting the transaction:, %s\n", transaction_err))
