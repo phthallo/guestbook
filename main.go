@@ -6,7 +6,6 @@ import (
 	"io"
 	"errors"
 	"os"
-	"regexp"
 
 	"github.com/charmbracelet/huh"
 	"github.com/gliderlabs/ssh"
