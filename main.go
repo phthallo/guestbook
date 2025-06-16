@@ -56,7 +56,7 @@ func StartSSHService(dbpool *pgxpool.Pool, ctx context.Context) {
 		if (err != nil) {
 			fmt.Println(err)
 			return
-		} else if (submitted) {
+		} else if (submitted && message != "") {
 			name, message = internal.Filter(name, message)
 			fmt.Printf("A new message was submitted by '%s'. They said '%s'\n", name, message)
 			tx, transaction_err := dbpool.Begin(context.Background())
