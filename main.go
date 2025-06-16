@@ -34,7 +34,7 @@ func StartSSHService(dbpool *pgxpool.Pool, ctx context.Context) {
 	ssh.Handle(func(sess ssh.Session) {
 		name = sess.User()
 		hostNameRegex, _ := regexp.Compile("(?:.*@)?([^@:]+)")
-
+		fmt.Printf("Attempted connection from %s to %s", sess.RemoteAddr(), sess.LocalAddr())
 		matchDomain := hostNameRegex.FindString(fmt.Sprintf("%s", sess.LocalAddr()))
 		if matchDomain != os.Getenv("HOSTNAME") {
 			sess.Exit(1)
