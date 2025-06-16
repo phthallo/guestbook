@@ -6,7 +6,7 @@ WORKDIR /github.com/phthallo/guestbook
 
 COPY docker_ip.sh /docker_ip.sh
 
-RUN chmod +x docker_ip.sh
+RUN chmod +x /docker_ip.sh
 
 ENTRYPOINT ["/docker_ip.sh"]
 
