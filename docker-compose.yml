@@ -6,6 +6,8 @@ services:
     volumes: 
       - ./:/github.com/phthallo/guestbook
     env_file: ".env"
+    environment: 
+      - TERM=xterm-256color
     ports: 
       - "${API_PORT}:${API_PORT}"
       - "${SSH_PORT}:${SSH_PORT}"
