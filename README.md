@@ -1,7 +1,7 @@
 # guestbook
 
 ```
-ssh guestbook.phthallo.com
+ssh guestbook.phthallo.com -p 2222
 ```
 
 <p align = "center"><i>leave me a message!</i></p>
@@ -59,6 +59,5 @@ docker compose up -d
 | `GIN_MODE` | Set it to `release` in production. Set it to anything else for `debug` mode in development.
 | `DATABASE_URL` | URL of a Postgres database used for storing messages. |
 | `TERM` | Set it to `xterm-256color`. For colours. |
-|  `HOSTNAME` | Set it to `127.0.0.1` for development. |
 
 [^1]: i somehow made all of this without knowing that charmbracelet/wish was a thing. lol, lmao even. 

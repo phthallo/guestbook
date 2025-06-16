@@ -33,19 +33,7 @@ func StartSSHService(dbpool *pgxpool.Pool, ctx context.Context) {
 	theme := huh.ThemeDracula()
 	ssh.Handle(func(sess ssh.Session) {
 		name = sess.User()
-		hostNameRegex, _ := regexp.Compile("(?:.*@)?([^@:]+)")
 		fmt.Printf("Attempted connection from %s to %s", sess.RemoteAddr(), sess.LocalAddr())
-		hostMatch := hostNameRegex.FindStringSubmatch(sess.LocalAddr().String())
-		var connectedHost string
-		if len(hostMatch) > 1 {
-			connectedHost = hostMatch[1]
-		} else {
-			connectedHost = sess.LocalAddr().String()
-		}
-		if connectedHost != os.Getenv("HOSTNAME") {
-			sess.Exit(1)
-			return
-		}		
 		form := huh.NewForm(
 			huh.NewGroup(
 				huh.NewInput().
