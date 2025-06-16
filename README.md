@@ -35,7 +35,7 @@ You can also customise the name attributed to your message by specifying a usern
     go main.go 
     ```
 
-5. Build it into a handy little `guestbook` executable and run it with `./guestbook`! The API will be accessible at `localhost:{API_PORT}` and the 
+5. Build it into a handy little `guestbook` executable and run it with `./guestbook`! The API will be accessible at `localhost:{API_PORT}` and the SSH server will listen on the specified `SSH_PORT`. 
     ```
     go build 
     ```
