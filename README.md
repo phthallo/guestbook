@@ -1,10 +1,13 @@
 # guestbook
 
+<p align = "center"><i>leave me a message!</i></p>
+
 ```
 ssh guestbook.phthallo.com -p 2222
 ```
 
-<p align = "center"><i>leave me a message!</i></p>
+
+<img width="1121" alt="image" src="https://github.com/user-attachments/assets/646c448b-15bf-4f16-99f4-fcb286dc82b1" />
 
 
 Guestbook[^1] is exactly what the name suggests - a guestbook for anyone who happens to stumble upon it. There are two parts to this: the SSH app where you can write a small message for me, and an API with a GET endpoint (`/entries?limit=10`) that returns the messages sent.
