@@ -29,7 +29,7 @@ func CreateEntriesIfNotExists(dbpool *pgxpool.Pool, ctx context.Context) (bool, 
 			return false, fmt.Errorf("\x1B[31m✕\033[0m\tunable to begin transaction: %v", err)
 		}
 
-		if _, err := tx.Exec(ctx, "CREATE TABLE entries (id INTEGER primary key GENERATED ALWAYS AS IDENTITY, name TEXT, message TEXT, approved BOOLEAN default null timestamp TIMESTAMP default current_timestamp)"); err != nil {
+		if _, err := tx.Exec(ctx, "CREATE TABLE entries (id INTEGER primary key GENERATED ALWAYS AS IDENTITY, name TEXT, message TEXT, timestamp TIMESTAMP default current_timestamp)"); err != nil {
 			return false, fmt.Errorf("\x1B[31m✕\033[0m\tunable to execute table creation: %v", err)
 		}
 
