@@ -20,7 +20,7 @@ func Filter(name string, message string) (string, string) {
 		gocensorword.WithCensorReplaceChar("*"),
 		gocensorword.WithSanitizeSpecialCharacters(false),
 		gocensorword.WithCustomWhiteList(CensorWhiteList),
-		gocensorword.WithReplaceCheckPattern("(?i) %s"),
+		gocensorword.WithReplaceCheckPattern("(?i)\b%s\b"),
 	)
 
 	filteredName, err := detector.CensorWord(name)
